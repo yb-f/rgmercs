@@ -161,7 +161,7 @@ end
 
 local _ClassConfig = {
     _version            = "1.0 - Emu",
-    _author             = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
+    _author             = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy, Lisie",
     ['Modes']           = { --simply determine the priority you gem spells in. Perhaps one day this could be configured to save different loadouts/change options.
         'General',
         'Tank',
