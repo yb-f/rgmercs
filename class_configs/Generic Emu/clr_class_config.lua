@@ -446,14 +446,12 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'CombatBuff',
+            name = 'CombatDebuff',
             timer = 10,
             state = 1,
-            steps = 1,
-            load_cond = function(self)
-                return self:GetResolvedActionMapItem('ReverseDS')
-            end,
-            targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
+            steps = 2,
+            load_cond = function(self) return self:GetResolvedActionMapItem('ReverseMarkDS') or self:GetResolvedActionMapItem('DecreaseMarkDS') end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
@@ -469,12 +467,21 @@ local _ClassConfig = {
         },
     },
     ['Rotations']         = {
-        ['CombatBuff'] = {
+        ['CombatDebuff'] = {
             {
-                name = "ReverseDS",
+                name = "ReverseMarkDS",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true) and Casting.GroupBuffCheck(spell, target)
+                    if not Config:GetSetting('DoReverseDS') then return false end
+                    return Casting.GemReady(spell) and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff() and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "DecreaseMarkDS",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoReverseDS') then return false end
+                    return Casting.GemReady(spell) and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
@@ -662,7 +669,6 @@ local _ClassConfig = {
                 { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
                 { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
                 { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
-                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "RezSpell",      cond = function(self) return true end, },
             },
@@ -670,19 +676,16 @@ local _ClassConfig = {
         {
             gem = 4,
             spells = {
-                { name = "SingleElixir",   cond = function(self) return Config:GetSetting('DoHealOverTime') end, },
+                { name = "SingleElixir",  cond = function(self) return Config:GetSetting('DoHealOverTime') end, },
                 --fallback
-                { name = "CureAll",        cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
-                { name = "GroupHealCure",  cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
-                { name = "MagicNuke",      cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
-                { name = "UndeadNuke",     cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
-                { name = "GroupVieBuff",   cond = function(self) return Config:GetSetting('DoVieBuff') end, },
-                { name = "SingleVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end },
-                { name = "ReverseMarkDS",  cond = function(self) return Config:GetSetting('DoReverseDS') end },
-                { Name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
-                { name = "RezSpell",       cond = function(self) return true end, },
+                { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
+                { name = "CurePoison",    cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
+                { name = "CureDisease",   cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
+                { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "RezSpell",      cond = function(self) return true end, },
             },
         },
         {
@@ -696,10 +699,9 @@ local _ClassConfig = {
                 { name = "GroupHealCure",  cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
                 { name = "MagicNuke",      cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
                 { name = "UndeadNuke",     cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
-                { name = "GroupVieBuff",   cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "SingleVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end },
                 { name = "ReverseMarkDS",  cond = function(self) return Config:GetSetting('DoReverseDS') end },
-                { Name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
+                { name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
                 { name = "RezSpell",       cond = function(self) return true end, },
             },
         },
@@ -714,10 +716,9 @@ local _ClassConfig = {
                 { name = "GroupHealCure",   cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
                 { name = "MagicNuke",       cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
                 { name = "UndeadNuke",      cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
-                { name = "GroupVieBuff",    cond = function(self) return Config:GetSetting('DoVieBuff') end, },
-                { name = "SingleVieBuff",   cond = function(self) return Config:GetSetting('DoVieBuff') end },
+                { name = "SingleVieBuff",   cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "ReverseMarkDS",   cond = function(self) return Config:GetSetting('DoReverseDS') end },
-                { Name = "DecreaseMarkDS",  cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
+                { name = "DecreaseMarkDS",  cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
                 { name = "RezSpell",        cond = function(self) return true end, },
             },
         },
@@ -726,24 +727,23 @@ local _ClassConfig = {
             spells = {
                 { name = "DivineBuff",     cond = function(self) return Config:GetSetting('DoDivineBuff') end, }, -- Level 51+
                 --fallback
-                { name = "StunTimer6",     cond = function(self) return Config:GetSetting('DoHealStun') end, },  -- 88+ has ToT heal
+                { name = "StunTimer6",     cond = function(self) return Config:GetSetting('DoHealStun') end, },   -- 88+ has ToT heal
                 { name = "CureAll",        cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
                 { name = "GroupHealCure",  cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
                 { name = "MagicNuke",      cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
                 { name = "UndeadNuke",     cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
-                { name = "GroupVieBuff",   cond = function(self) return Config:GetSetting('DoVieBuff') end, },
-                { name = "SingleVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end },
+                { name = "SingleVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "ReverseMarkDS",  cond = function(self) return Config:GetSetting('DoReverseDS') end },
-                { Name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
+                { name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
                 { name = "RezSpell",       cond = function(self) return true end, },
             },
         },
         {
             gem = 8,
             spells = {
-                { name = "YaulpSpell",     cond = function(self) return not Casting.CanUseAA("Yaulp") end, },  -- Level 56-75
+                { name = "YaulpSpell",     cond = function(self) return not Casting.CanUseAA("Yaulp") end, },   -- Level 56-75
                 --fallback
                 { name = "StunTimer6",     cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- 88+ has ToT heal                                                                   -- Level 97
                 { name = "CureAll",        cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
@@ -752,10 +752,9 @@ local _ClassConfig = {
                 { name = "GroupHealCure",  cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
                 { name = "MagicNuke",      cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
                 { name = "UndeadNuke",     cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
-                { name = "GroupVieBuff",   cond = function(self) return Config:GetSetting('DoVieBuff') end, },
-                { name = "SingleVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end },
+                { name = "SingleVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "ReverseMarkDS",  cond = function(self) return Config:GetSetting('DoReverseDS') end },
-                { Name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
+                { name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
                 { name = "RezSpell",       cond = function(self) return true end, },
             },
         },
@@ -766,17 +765,16 @@ local _ClassConfig = {
                 -- Leve 56-59 free
                 { name = "GroupElixir",    cond = function(self) return Config:GetSetting('DoHealOverTime') end, }, -- Level 60+, gets better from 70 on, this may be overwritten before 75
                 --fallback
-                { name = "StunTimer6",     cond = function(self) return Config:GetSetting('DoHealStun') end, },    -- 88+ has ToT heal                                                                          -- Level 97
+                { name = "StunTimer6",     cond = function(self) return Config:GetSetting('DoHealStun') end, },     -- 88+ has ToT heal                                                                          -- Level 97
                 { name = "CureAll",        cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
                 { name = "GroupHealCure",  cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
                 { name = "MagicNuke",      cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
                 { name = "UndeadNuke",     cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
-                { name = "GroupVieBuff",   cond = function(self) return Config:GetSetting('DoVieBuff') end, },
-                { name = "SingleVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end },
+                { name = "SingleVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "ReverseMarkDS",  cond = function(self) return Config:GetSetting('DoReverseDS') end },
-                { Name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
+                { name = "DecreaseMarkDS", cond = function(self) return Config:GetSetting('DoDecreaseDS') end },
                 { name = "RezSpell",       cond = function(self) return true end, },
             },
         },
@@ -834,33 +832,34 @@ local _ClassConfig = {
             Answer = "We will always use the Shining line on the tank, but if selected, we will also use the Vie Buff on the Group.\n" ..
                 "Before we have the Shining Buff, we will use our single-target Vie buff only on the tank.",
         },
-        ['DoVetAA']         = {
-            DisplayName = "Use Vet AA",
-            Category = "Buffs/Debuffs",
-            Index = 5,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
-            Default = true,
-            FAQ = "What Vet AA's does CLR use?",
-            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns. Clerics have tools that largely leave Armor of Experience unused.",
-        },
         ['DoReverseDS']     = {
             DisplayName = "Use Reverse DS",
             Category = "Buffs/Debuffs",
-            Index = 6,
-            Tooltip = "Use reverse DS (Debuff on mob that causes them to take damage when attacking).",
+            Index = 4,
+            Tooltip = "Use reverse DS spells. (Debuff on mob that damages them when they attack)",
             Default = false,
-            FAQ = "What is a reverse DS spell and how do I use it?",
-            Answer =
-            "Reverse DS is a debuff on a mob that will cause them to take damage when they hit something. For example the spell Mark of the Blameless. Enable Use Reverse DS to use.",
+            FAQ = "What is a reverse DS and how do i enable it?",
+            Answer = "A reverse DS is a debuff cast on a hostile mob that causes them to take damage when they attack.\n" ..
+                "You can enable this by setting Use Reverse DS to on.",
         },
         ['DoDecreaseDS']    = {
             DisplayName = "Use Decrease DS",
             Category = "Buffs/Debuffs",
-            Index = 7,
-            Tooltip = "Use decrease DS (Debuff on mob that heals you when attacking).",
+            Index = 5,
+            Tooltip = "Use decrease DS spells (Debuff on mob that causes players to be healed when attacking.)",
             Default = false,
-            FAQ = "What is a decrease DS spell and how do I use it?",
-            Answer = "A decrease DS spell is a spell that heals a player when it attacks the mob it is applied to. For example Mark of Kings.  To use activate Use Decrease DS.",
+            FAQ = "What is a decrease DS spell and how do I enable it?",
+            Answer = "A decrease DS spell is a debuff cast on a hostile mob that can cause attacks against the mob to act as small heals.\n" ..
+                "You can enable this by setting Use Decrease DS to on.",
+        },
+        ['DoVetAA']         = {
+            DisplayName = "Use Vet AA",
+            Category = "Buffs/Debuffs",
+            Index = 6,
+            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
+            Default = true,
+            FAQ = "What Vet AA's does CLR use?",
+            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns. Clerics have tools that largely leave Armor of Experience unused.",
         },
         --Combat
         ['DoHealStun']      = {
