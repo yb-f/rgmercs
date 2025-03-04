@@ -749,25 +749,42 @@ end
 --- @return number The group member with the lowest mana percentage, or nil if no member meets the criteria.
 function Combat.FindWorstHurtManaGroupMember(minMana)
     local groupSize = mq.TLO.Group.Members()
+    local raidSize = mq.TLO.Raid.Members() or 0
     local worstId = mq.TLO.Me.ID() --initializes with the BST's ID/Mana because it isn't checked below
     local worstPct = mq.TLO.Me.PctMana()
 
-    Logger.log_verbose("\ayChecking for worst HurtMana Group Members. Group Count: %d", groupSize)
 
-    for i = 1, groupSize do
-        local healTarget = mq.TLO.Group.Member(i)
+    if raidSize > 0 then
+        Logger.log_verbose("\ayChecking for worst HurtMana Raid Members. Raid Count: %d", raidSize)
+        for i = 1, raidSize do
+            local healTarget = mq.TLO.Raid.Member(i).Spawn
 
-        if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
-            if Config.Constants.RGCasters:contains(healTarget.Class.ShortName()) then
-                if not healTarget.Dead() and healTarget.PctMana() < worstPct then
-                    Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                    worstPct = healTarget.PctMana()
-                    worstId = healTarget.ID()
+            if healTarget and healTarget() and not healTarget.ID() == 0 then
+                if Config.Constants.RGCasters:contains(healTarget.Class.ShortName()) then
+                    if not healTarget.Dead() and healTarget.PctMana() < worstPct then
+                        Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                        worstPct = healTarget.PctMana()
+                        worstId = healTarget.ID()
+                    end
+                end
+            end
+        end
+    else
+        Logger.log_verbose("\ayChecking for worst HurtMana Group Members. Group Count: %d", groupSize)
+        for i = 1, groupSize do
+            local healTarget = mq.TLO.Group.Member(i)
+
+            if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
+                if Config.Constants.RGCasters:contains(healTarget.Class.ShortName()) then
+                    if not healTarget.Dead() and healTarget.PctMana() < worstPct then
+                        Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                        worstPct = healTarget.PctMana()
+                        worstId = healTarget.ID()
+                    end
                 end
             end
         end
     end
-
     --Still possibly carrying the BST ID, but only reports BST if under 100%, which is when they will self-Paragon
     if worstId > 0 and worstPct < 100 then
         Logger.log_verbose("\agWorst HurtMana group member id is %d", worstId)
@@ -783,32 +800,48 @@ end
 --- @return number The group member with the lowest health percentage, or nil if no member meets the criteria.
 function Combat.FindWorstHurtGroupMember(minHPs)
     local groupSize = mq.TLO.Group.Members()
+    local raidSize = mq.TLO.Raid.Members() or 0
     local worstId = mq.TLO.Me.ID()
     local worstPct = mq.TLO.Me.PctHPs() < minHPs and mq.TLO.Me.PctHPs() or minHPs
 
-    Logger.log_verbose("\ayChecking for worst Hurt Group Members. Group Count: %d", groupSize)
+    if raidSize > 0 then
+        Logger.log_verbose("\ayChecking for worst Hurt Raid Members. Raid Count: %d", raidSize)
+        for i = 1, raidSize do
+            local healTarget = mq.TLO.Raid.Member(i).Spawn
 
-    for i = 1, groupSize do
-        local healTarget = mq.TLO.Group.Member(i)
-
-        if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
-            if not healTarget.Dead() and (healTarget.PctHPs() or 101) < worstPct then
-                Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                worstPct = healTarget.PctHPs()
-                worstId = healTarget.ID()
+            if healTarget and healTarget() and not healTarget.ID() == 0 then
+                if Config.Constants.RGCasters:contains(healTarget.Class.ShortName()) then
+                    if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
+                        Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                        worstPct = healTarget.PctHPs()
+                        worstId = healTarget.ID()
+                    end
+                end
             end
+        end
+    else
+        Logger.log_verbose("\ayChecking for worst Hurt Group Members. Group Count: %d", groupSize)
+        for i = 1, groupSize do
+            local healTarget = mq.TLO.Group.Member(i)
 
-            if Config:GetSetting('DoPetHeals') then
-                if (healTarget.Pet.ID() or 0) > 0 and (healTarget.Pet.PctHPs() or 101) < (worstPct or 0) then
-                    Logger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
-                        healTarget.Pet.DisplayName())
-                    worstPct = healTarget.Pet.PctHPs()
-                    worstId = healTarget.Pet.ID()
+            if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
+                if not healTarget.Dead() and (healTarget.PctHPs() or 101) < worstPct then
+                    Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                    worstPct = healTarget.PctHPs()
+                    worstId = healTarget.ID()
+                end
+
+                if Config:GetSetting('DoPetHeals') then
+                    if (healTarget.Pet.ID() or 0) > 0 and (healTarget.Pet.PctHPs() or 101) < (worstPct or 0) then
+                        Logger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
+                            healTarget.Pet.DisplayName())
+                        worstPct = healTarget.Pet.PctHPs()
+                        worstId = healTarget.Pet.ID()
+                    end
                 end
             end
         end
     end
-
     if worstId > 0 then
         Logger.log_verbose("\agWorst hurt group member id is %d", worstId)
     else

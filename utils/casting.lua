@@ -1504,18 +1504,31 @@ function Casting.GetBuffableGroupIDs()
     if Casting.AmIBuffable() then
         table.insert(groupIds, mq.TLO.Me.ID())
 
-        local count = mq.TLO.Group.Members()
-        for i = 1, count do
-            local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
-            if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
-                groupIds = {}
-                Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
-                break
-            else
-                table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+        if mq.TLO.Raid.Members() > 0 then
+            local count = mq.TLO.Raid.Members()
+            for i = 1, count do
+                local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Raid.Member(i).Name())
+                if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
+                    groupIds = {}
+                    Logger.log_debug("Raidmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Raid.Member(i).Name())
+                    break
+                else
+                    table.insert(groupIds, mq.TLO.Raid.Member(i).ID())
+                end
+            end
+        else
+            local count = mq.TLO.Group.Members()
+            for i = 1, count do
+                local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+                if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
+                    groupIds = {}
+                    Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
+                    break
+                else
+                    table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                end
             end
         end
-
         -- check OA list
         for _, n in ipairs(Config:GetSetting('OutsideAssistList')) do
             -- dont double up OAs who are in our group
