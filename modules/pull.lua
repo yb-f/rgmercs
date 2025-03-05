@@ -86,9 +86,9 @@ Module.Constants.PullAreaType          = {
 }
 
 Module.Constants.PullAreaNames         = {
-    "Radius Around Camp",
-    "Radius Around Point",
-    "Rectangle Pull Area",
+    "Radius (From Camp/Hunter/Waypoint)",
+    "Radius (From Designated Point)",
+    "Rectangle",
 }
 
 Module.Constants.PullAbilities         = {
@@ -174,20 +174,12 @@ Module.TempSettings.ValidPullAbilities = {}
 Module.DefaultConfig                   = {
     ['DoPull']                                 = {
         DisplayName = "Enable Pulling",
-        Category = "Pulling",
+        Category = "",
         Tooltip = "Enable pulling",
         Default = false,
+        Type = "Custom",
         FAQ = "My Puller isn't Pulling, what do I do?",
         Answer = "Make sure you have [DoPull] enabled.",
-    },
-    ['PullDebuffed']                           = {
-        DisplayName = "Pull While Debuffed",
-        Category = "Pulling",
-        Tooltip = "Pull in spite of being debuffed (Not ignored: Rez Sickness, Root.)",
-        Default = false,
-        ConfigType = "Advanced",
-        FAQ = "I keep stopping pulls while diseased or debuffed, how do I fix this?",
-        Answer = "Enable [PullDebuffed] and you will pull even if you are debuffed.",
     },
     ['StopPullAfterDeath']                     = {
         DisplayName = "Stop Pulling After Death",
@@ -276,8 +268,19 @@ Module.DefaultConfig                   = {
         FAQ = "A mob is with in range but the path to get to them is very long, how can I adjust how far I will path to my target?",
         Answer = "You can adjust the path distance you pull from with [MaxPathRange].",
     },
+    ['MaxMoveTime']                            = {
+        DisplayName = "Max Move Time",
+        Category = "Pull Distance",
+        Tooltip = "The max number of seconds we will navigate to our intended pull target without reassessing targets.",
+        Default = 5,
+        Min = 1,
+        Max = 30,
+        FAQ = "Why does my puller stop every so often before running again to the same target?",
+        Answer = "The puller will periodically reassess targets if navigation has been active for a while.\n" ..
+            "This can be adjusted by changing the Max Move Time on the Pull Distance tab.",
+    },
     ['PullRadius']                             = {
-        DisplayName = "Pull Radius",
+        DisplayName = "Pull Radius (Camp)",
         Category = "Pull Distance",
         Tooltip = "Distance to pull",
         Default = 350,
@@ -295,7 +298,7 @@ Module.DefaultConfig                   = {
         Answer = "Enable [HuntFromPlayer] and you will scan from your current location after every pull, instead of the Hunt Starting Position.",
     },
     ['PullRadiusHunt']                         = {
-        DisplayName = "Pull Radius Hunt",
+        DisplayName = "Pull Radius (Hunt)",
         Category = "Pull Distance",
         Tooltip = "Distance to pull in Hunt mode from your starting position",
         Default = 500,
@@ -315,7 +318,7 @@ Module.DefaultConfig                   = {
         Answer = "You can adjust the distance you pull on the Z axis with [PullZRadius].",
     },
     ['PullRadiusFarm']                         = {
-        DisplayName = "Pull Radius Farm",
+        DisplayName = "Pull Radius (Farm)",
         Category = "Pull Distance",
         Tooltip = "Distance to pull in Farm mode",
         Default = 90,
@@ -324,23 +327,11 @@ Module.DefaultConfig                   = {
         FAQ = "I want to adjust the distance I pull from at the waypoint stops in Farm Mode, how do I do that?",
         Answer = "You can adjust how far you pull from at the stops using the [PullRadiusFarm] setting.",
     },
-    ['PullCircleCenterY']                      = {
-        DisplayName = "Pull Center Y",
-        Category = "Pull Radius Point",
-        Tooltip = "Y point of circle center",
-        Index = 1,
-        Default = 0,
-        Min = -10000,
-        Max = 10000,
-        ConfigType = "Advanced",
-        FAQ = "How do I set the center (Y) of my pull circle.",
-        Answer = "Set Pull Center Y to where you would like the Y point of your pull radius to be.",
-    },
     ['PullCircleCenterX']                      = {
-        DisplayName = "Pull Center X",
-        Category = "Pull Radius Point",
+        DisplayName = "Designated Point X",
+        Category = "Pull Area",
         Tooltip = "X point of circle center",
-        Index = 2,
+        Index = 1,
         Default = 0,
         Min = -10000,
         Max = 10000,
@@ -348,9 +339,21 @@ Module.DefaultConfig                   = {
         FAQ = "How do I set the center (X) of my pull circle.",
         Answer = "Set Pull Center X to where you would like the Y point of your pull radius to be.",
     },
+    ['PullCircleCenterY']                      = {
+        DisplayName = "Designated Point Y",
+        Category = "Pull Area",
+        Tooltip = "Y point of circle center",
+        Index = 2,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the center (Y) of my pull circle.",
+        Answer = "Set Pull Center Y to where you would like the Y point of your pull radius to be.",
+    },
     ['PullCircleCenterZ']                      = {
-        DisplayName = "Pull Center Z",
-        Category = "Pull Radius Point",
+        DisplayName = "Designated Point Z",
+        Category = "Pull Area",
         Tooltip = "Z point of circle center",
         Index = 3,
         Default = 0,
@@ -361,10 +364,10 @@ Module.DefaultConfig                   = {
         Answer = "Set Pull Center Z to where you would like the Y point of your pull radius to be.",
     },
     ['PullNWCornerX']                          = {
-        DisplayName = "North West Corner X",
-        Category = "Pull Rectangle Points",
+        DisplayName = "Rect. NW Corner X",
+        Category = "Pull Area",
         Tooltip = "X Location of North West Corner for rectangle pull area.",
-        Index = 1,
+        Index = 4,
         Default = 0,
         Min = -10000,
         Max = 10000,
@@ -373,10 +376,10 @@ Module.DefaultConfig                   = {
         Answer = "Set North West Corner X to where you would like the x point of your corner to be.",
     },
     ['PullNWCornerY']                          = {
-        DisplayName = "North West Corner Y",
-        Category = "Pull Rectangle Points",
+        DisplayName = "Rect. NW Corner Y",
+        Category = "Pull Area",
         Tooltip = "Y Location of North West Corner for rectangle pull area.",
-        Index = 2,
+        Index = 5,
         Default = 0,
         Min = -10000,
         Max = 10000,
@@ -385,10 +388,10 @@ Module.DefaultConfig                   = {
         Answer = "Set North West Corner Y to where you would like the x point of your corner to be.",
     },
     ['PullSECornerX']                          = {
-        DisplayName = "South East Corner X",
-        Category = "Pull Rectangle Points",
+        DisplayName = "Rect. SE Corner X",
+        Category = "Pull Area",
         Tooltip = "X Location of South East Corner for rectangle pull area.",
-        Index = 3,
+        Index = 6,
         Default = 0,
         Min = -10000,
         Max = 10000,
@@ -397,10 +400,10 @@ Module.DefaultConfig                   = {
         Answer = "Set South East Corner X to where you would like the x point of your corner to be.",
     },
     ['PullSECornerY']                          = {
-        DisplayName = "South East Corner Y",
-        Category = "Pull Rectangle Points",
+        DisplayName = "Rect. SE Corner Y",
+        Category = "Pull Area",
         Tooltip = "Y Location of South East Corner for rectangle pull area.",
-        Index = 4,
+        Index = 7,
         Default = 0,
         Min = -10000,
         Max = 10000,
@@ -409,10 +412,10 @@ Module.DefaultConfig                   = {
         Answer = "Set South East Corner Y to where you would like the x point of your corner to be.",
     },
     ['PullRectangleZPoint']                    = {
-        DisplayName = "Base Z Location",
-        Category = "Pull Rectangle Points",
+        DisplayName = "Rect. Plane Z",
+        Category = "Pull Area",
         Tooltip = "Z Location base height for rectangle pull area.",
-        Index = 5,
+        Index = 8,
         Default = 0,
         Min = -10000,
         Max = 10000,
@@ -421,16 +424,79 @@ Module.DefaultConfig                   = {
         Answer = "Set Base Z Location to where you would like the point to be.",
     },
     ['PullRectangleZRadius']                   = {
-        DisplayName = "Rectangle Pulling Z Radius",
-        Category = "Pull Rectangle Points",
+        DisplayName = "Rect. Pull Z Radius",
+        Category = "Pull Area",
         Tooltip = "Z Location pull radius for rectangle pull area",
-        Index = 6,
+        Index = 9,
         Default = 30,
         Min = 0,
         Max = 10000,
         ConfigType = "Advanced",
         FAQ = "How do I set a Z radius when I am using rectangle pull area?",
         Answer = "Set Rectangle Pulling Z Radius.",
+    },
+    ['PullHPPct']                              = {
+        DisplayName = "Puller HP %",
+        Category = "Puller",
+        Index = 1,
+        Tooltip = "Make sure you have at least this much HP %",
+        Default = 60,
+        Min = 1,
+        Max = 100,
+        FAQ = "I keep trying to pull when I have half health. I don't want to die, how do I fix this?",
+        Answer = "You can adjust the HP % for pulls with [PullHPPct] and you will not pull until you are above that setting.",
+    },
+    ['PullManaPct']                            = {
+        DisplayName = "Puller Mana %",
+        Category = "Puller",
+        Index = 2,
+        Tooltip = "Make sure you have at least this much Mana %",
+        Default = 60,
+        Min = 0,
+        Max = 100,
+        FAQ = "I keep trying to pull when I have half mana. I don't want to run out, how do I fix this?",
+        Answer = "You can adjust the Mana % for pulls with [PullManaPct] and you will not pull until you are above that setting.",
+    },
+    ['PullEndPct']                             = {
+        DisplayName = "Puller End %",
+        Category = "Puller",
+        Index = 3,
+        Tooltip = "Make sure you have at least this much Endurance %",
+        Default = 30,
+        Min = 0,
+        Max = 100,
+        FAQ = "I keep trying to pull when I have half endurance. I don't want to run out, how do I fix this?",
+        Answer = "You can adjust the Endurance % for pulls with [PullEndPct] and you will not pull until you are above that setting.",
+    },
+    ['PullRespectMedState']                    = {
+        DisplayName = "Respect Med State",
+        Category = "Puller",
+        Index = 4,
+        Tooltip = "Hold pulls if you are currently meditating.",
+        Default = false,
+        FAQ = "My puller only meds long enough to meet the pull minimums, what can be done?",
+        Answer = "If you turn on Respect Med State in the Group Watch options, your puller will remain medding until those thresholds are reached.",
+    },
+    ['PullBuffCount']                          = {
+        DisplayName = "Min Buff Count",
+        Category = "Puller",
+        Index = 5,
+        Tooltip = "The minimum number of buffs in our buff window we should have before pulling (0 disables).",
+        Default = 0,
+        Min = 0,
+        Max = 40,
+        FAQ = "How do I make it so my puller doesn't pull with no buffs?",
+        Answer = "Set the min number of buffs before pulling with Min Buff Count and the pulling will pause to wait for that number of buffs.",
+    },
+    ['PullDebuffed']                           = {
+        DisplayName = "Pull While Debuffed",
+        Category = "Puller",
+        Index = 6,
+        Tooltip = "Pull in spite of being debuffed (Not ignored: Rez Sickness, Root.)",
+        Default = false,
+        ConfigType = "Advanced",
+        FAQ = "I keep stopping pulls while diseased or debuffed, how do I fix this?",
+        Answer = "Enable [PullDebuffed] and you will pull even if you are debuffed.",
     },
     ['PullMinCon']                             = {
         DisplayName = "Pull Min Con",
@@ -508,31 +574,69 @@ Module.DefaultConfig                   = {
         DisplayName = "Enable Group Watch",
         Category = "Group Watch",
         Index = 1,
-        Tooltip = "1 = Off, 2 = Healers, 3 = Everyone, 4 = Cleric",
-        Type = "Combo",
-        ComboOptions = { 'Off', 'Healers', 'Everyone', 'Cleric' },
-        Default = 4,
-        Min = 1,
-        Max = 3,
+        Tooltip = "Watch the mana and/or endurance of the group members selected below.",
+        Default = true,
         FAQ = "I want to make sure my group is ready before I pull, how do I do that?",
-        Answer = "Select a different mode from the [GroupWatch] dropdown.\n" ..
-            "Off = Don't check group members.\n" ..
-            "Healers = Check Healers for Mana, HP, or Endurance.\n" ..
-            "Everyone = Check Everyone for Mana, HP, or Endurance.",
+        Answer = "You can Enable Group Watch on the Group Watch tab to watch the selected groupmembers for low MP and/or Endurance.",
+    },
+    ['GroupWatchF2']                           = {
+        DisplayName = mq.TLO.Group.Member(1) and string.format("Watch %s", mq.TLO.Group.Member(1).CleanName()) or "No GroupMember",
+        Category = "Group Watch",
+        Index = 2,
+        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Default = false,
+        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
+        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
+    },
+    ['GroupWatchF3']                           = {
+        DisplayName = mq.TLO.Group.Member(2) and string.format("Watch %s", mq.TLO.Group.Member(2).CleanName()) or "No GroupMember",
+        Category = "Group Watch",
+        Index = 3,
+        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Default = false,
+        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
+        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
+    },
+    ['GroupWatchF4']                           = {
+        DisplayName = mq.TLO.Group.Member(3) and string.format("Watch %s", mq.TLO.Group.Member(3).CleanName()) or "No GroupMember",
+        Category = "Group Watch",
+        Index = 4,
+        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Default = false,
+        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
+        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
+    },
+    ['GroupWatchF5']                           = {
+        DisplayName = mq.TLO.Group.Member(4) and string.format("Watch %s", mq.TLO.Group.Member(4).CleanName()) or "No GroupMember",
+        Category = "Group Watch",
+        Index = 5,
+        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Default = false,
+        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
+        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
+    },
+    ['GroupWatchF6']                           = {
+        DisplayName = mq.TLO.Group.Member(5) and string.format("Watch %s", mq.TLO.Group.Member(5).CleanName()) or "No GroupMember",
+        Category = "Group Watch",
+        Index = 6,
+        Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
+        Default = false,
+        FAQ = "My (insert class here) has no mana, why am I still pulling?!?!",
+        Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchEnd']                          = {
         DisplayName = "Watch Group Endurance",
         Category = "Group Watch",
-        Index = 4,
-        Tooltip = "Check for Endurance on Group Members",
+        Index = 9,
+        Tooltip = "Check for Endurance on Group Members.",
         Default = false,
         FAQ = "I want to make sure my group has enough Endurance before I pull, how do I do that?",
         Answer = "Enable [GroupWatchEnd] and you will check for Endurance on Group Members.",
     },
     ['GroupWatchStartPct']                     = {
-        DisplayName = "Group Watch Start %",
+        DisplayName = "Pulling Pause %",
         Category = "Group Watch",
-        Index = 2,
+        Index = 7,
         Tooltip = "If your group member is above [X]% resource, start pulls again.",
         Default = 80,
         Min = 1,
@@ -541,9 +645,9 @@ Module.DefaultConfig                   = {
         Answer = "You can adjust the start % for pulls with [GroupWatchStartPct] and you will not pull until they are above that setting.",
     },
     ['GroupWatchStopPct']                      = {
-        DisplayName = "Group Watch Stop %",
+        DisplayName = "Pulling Resume %",
         Category = "Group Watch",
-        Index = 3,
+        Index = 8,
         Tooltip = "If your group member is below [X]% resource, stop pulls.",
         Default = 40,
         Min = 1,
@@ -552,52 +656,10 @@ Module.DefaultConfig                   = {
         Answer = "Make sure [GroupWatch] is enabled. \n" ..
             "You can adjust the stop % for pulls with [GroupWatchStopPct] and you will stop pulling until they are above that setting.",
     },
-    ['PullHPPct']                              = {
-        DisplayName = "Pull HP %",
-        Category = "Group Watch",
-        Index = 5,
-        Tooltip = "Make sure you have at least this much HP %",
-        Default = 60,
-        Min = 1,
-        Max = 100,
-        FAQ = "I keep trying to pull when I have half health. I don't want to die, how do I fix this?",
-        Answer = "You can adjust the HP % for pulls with [PullHPPct] and you will not pull until you are above that setting.",
-    },
-    ['PullManaPct']                            = {
-        DisplayName = "Pull Mana %",
-        Category = "Group Watch",
-        Index = 7,
-        Tooltip = "Make sure you have at least this much Mana %",
-        Default = 60,
-        Min = 0,
-        Max = 100,
-        FAQ = "I keep trying to pull when I have half mana. I don't want to run out, how do I fix this?",
-        Answer = "You can adjust the Mana % for pulls with [PullManaPct] and you will not pull until you are above that setting.",
-    },
-    ['PullEndPct']                             = {
-        DisplayName = "Pull End %",
-        Category = "Group Watch",
-        Index = 6,
-        Tooltip = "Make sure you have at least this much Endurance %",
-        Default = 30,
-        Min = 0,
-        Max = 100,
-        FAQ = "I keep trying to pull when I have half endurance. I don't want to run out, how do I fix this?",
-        Answer = "You can adjust the Endurance % for pulls with [PullEndPct] and you will not pull until you are above that setting.",
-    },
-    ['PullRespectMedState']                    = {
-        DisplayName = "Respect Med State",
-        Category = "Group Watch",
-        Index = 8,
-        Tooltip = "Hold pulls if you are currently meditating.",
-        Default = false,
-        FAQ = "My puller only meds long enough to meet the pull minimums, what can be done?",
-        Answer = "If you turn on Respect Med State in the Group Watch options, your puller will remain medding until those thresholds are reached.",
-    },
     ['PullWaitCorpse']                         = {
         DisplayName = "Hold for Corpses",
         Category = "Group Watch",
-        Index = 9,
+        Index = 14,
         Tooltip = "Hold pulls while we detect a groupmember's corpse in the vicinity.",
         Default = true,
         FAQ = "Why do I stop pulling every time someone dies?",
@@ -606,7 +668,7 @@ Module.DefaultConfig                   = {
     ['WaitAfterRez']                           = {
         DisplayName = "Wait After Rez",
         Category = "Group Watch",
-        Index = 10,
+        Index = 15,
         Tooltip = "If the puller detected a group corpse and held pulls, allow x seconds for the group to rebuff after the corpse is rezzed.\n" ..
             "**Only respected when \"Hold for Corpses\" is enabled and a corpse was detected by that process!**",
         Default = 0,
@@ -659,16 +721,6 @@ Module.DefaultConfig                   = {
         FAQ = "How do I make it so my puller doesn't pull in certain zones?",
         Answer = "You can add a zone to the [PullSafeZones] and it will not pull in that zone.\n" ..
             "This list is found in /config/rgmercs/PCConfigs/Pull_<Server>_<Character>.lua",
-    },
-    ['PullBuffCount']                          = {
-        DisplayName = "Min Buff Count",
-        Category = "Pulling",
-        Tooltip = "The minimum number of buffs in our buff window we should have before pulling (0 disables).",
-        Default = 0,
-        Min = 0,
-        Max = 40,
-        FAQ = "How do I make it so my puller doesn't pull with no buffs?",
-        Answer = "Set the min number of buffs before pulling with Min Buff Count and the pulling will pause to wait for that number of buffs.",
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
@@ -1008,22 +1060,34 @@ function Module:Render()
         ImGui.PopStyleVar(1)
 
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
+        Ui.Tooltip("Select the Pull Mode you would like to use:\n" ..
+            "Normal = Set a camp, and pull a single mob to it (Will not split pull, sorry!).\n" ..
+            "Chain = Set a camp, and pull a number of mobs (equal to your Chain Count setting) to it.\n" ..
+            "Hunt = Roam an area with your group, pulling as you go.\n" ..
+            "Farm = Move from waypoint to waypoint, pulling within a set radius from each.\n")
         if pressed then
             self:SaveSettings(false)
         end
+        ImGui.NewLine()
+
+        --Pull Area Type dropdown
+        self.settings.PullAreaType, pressed = ImGui.Combo("Pull Area Type", self.settings.PullAreaType, self.Constants.PullAreaNames,
+            #self.Constants.PullAreaNames)
+        Ui.Tooltip("Select the Pull Area you would like to use:\n" ..
+            "From Camp/Hunter/Waypoint: The pull area will centered on the location you start pulling from.\n" ..
+            "From Designated Point: The pull area will be centered on the coordinates you provide in the Pull Area tab.\n" ..
+            "Rectangle Pull Area: The pull area will be within a box drawn from coordinates you provide in the Pull Area tab.")
+        if pressed then
+            self:SaveSettings(false)
+        end
+        ImGui.NewLine()
+
         if #self.TempSettings.ValidPullAbilities > 0 then
             self.settings.PullAbility, pressed = ImGui.Combo("Pull Ability", self.settings.PullAbility, function(id) return self:getPullAbilityDisplayName(id) end,
                 #self.TempSettings.ValidPullAbilities) --, self.TempSettings.ValidPullAbilities, #self.TempSettings.ValidPullAbilities)
             if pressed then
                 self:SaveSettings(false)
             end
-        end
-
-        --Pull Area Type dropdown
-        self.settings.PullAreaType, pressed = ImGui.Combo("Pull Area Type", self.settings.PullAreaType, self.Constants.PullAreaNames,
-            #self.Constants.PullAreaNames)
-        if pressed then
-            self:SaveSettings(false)
         end
 
         local nextPull = self.settings.PullDelay - (os.clock() - self.TempSettings.LastPullOrCombatEnded)
@@ -1094,7 +1158,6 @@ function Module:Render()
         ImGui.Text("Note: Allow List will supersede Deny List")
         self:RenderMobList("Allow List", "PullAllowList")
         self:RenderMobList("Deny List", "PullDenyList")
-        ImGui.NewLine()
         ImGui.Separator()
 
         if Config:GetSetting('DoPull') then
@@ -1456,86 +1519,91 @@ function Module:FarmFullInvActions()
 end
 
 ---comment
----@param classes table|nil # mq.Set type
+-- -@param classes table|nil # mq.Set type
 ---@param resourceResumePct number -- Resume pulls at this pct
 ---@param resourcePausePct number -- Hold pulls at this pct
 ---@param campData table
 ---@return boolean, string
-function Module:CheckGroupForPull(classes, resourceResumePct, resourcePausePct, campData)
+function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
     local groupCount = mq.TLO.Group.Members()
 
     if not groupCount or groupCount == 0 then return true, "" end
     local maxDist = math.max(Config:GetSetting('AutoCampRadius') ^ 2, 200 ^ 2)
 
-    for i = 1, groupCount do
+    local groupWatch = {
+        self.settings.GroupWatchF2,
+        self.settings.GroupWatchF3,
+        self.settings.GroupWatchF4,
+        self.settings.GroupWatchF5,
+        self.settings.GroupWatchF6,
+    }
+
+    for i, _ in ipairs(groupWatch) do
         local member = mq.TLO.Group.Member(i)
+        if groupWatch[i] and member and member.ID() > 0 then
+            local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceResumePct or resourcePausePct
+            if member.PctHPs() < resourcePct then
+                Comms.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
+                Logger.log_verbose("\arMember is low on Health - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
+                    resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
+                return false, string.format("%s Low HP", member.CleanName())
+            end
+            if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct then
+                Comms.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
+                Logger.log_verbose("\arMember is low on Mana - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
+                    resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
+                return false, string.format("%s Low Mana", member.CleanName())
+            end
+            if Config:GetSetting('GroupWatchEnd') and member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
+                Comms.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
+                Logger.log_verbose(
+                    "\arMember is low on Endurance - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d", resourcePct,
+                    resourcePausePct, resourceResumePct, self.TempSettings.PullState)
+                return false, string.format("%s Low End", member.CleanName())
+            end
 
-        if member and member.ID() > 0 then
-            if not classes or classes:contains(member.Class.ShortName()) then
-                local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceResumePct or resourcePausePct
-                if member.PctHPs() < resourcePct then
-                    Comms.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
-                    Logger.log_verbose("\arMember is low on Health - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
-                        resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
-                    return false, string.format("%s Low HP", member.CleanName())
-                end
-                if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct then
-                    Comms.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
-                    Logger.log_verbose("\arMember is low on Mana - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
-                        resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
-                    return false, string.format("%s Low Mana", member.CleanName())
-                end
-                if Config:GetSetting('GroupWatchEnd') and member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
-                    Comms.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
-                    Logger.log_verbose(
-                        "\arMember is low on Endurance - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d", resourcePct,
-                        resourcePausePct, resourceResumePct, self.TempSettings.PullState)
-                    return false, string.format("%s Low End", member.CleanName())
-                end
+            if member.Hovering() then
+                Comms.PrintGroupMessage("%s is dead - Holding pulls!", member.CleanName())
+                return false, string.format("%s Dead", member.CleanName())
+            end
 
-                if member.Hovering() then
-                    Comms.PrintGroupMessage("%s is dead - Holding pulls!", member.CleanName())
-                    return false, string.format("%s Dead", member.CleanName())
-                end
+            if member.OtherZone() then
+                Comms.PrintGroupMessage("%s is in another zone - Holding pulls!", member.CleanName())
+                return false, string.format("%s Out of Zone", member.CleanName())
+            end
 
-                if member.OtherZone() then
-                    Comms.PrintGroupMessage("%s is in another zone - Holding pulls!", member.CleanName())
-                    return false, string.format("%s Out of Zone", member.CleanName())
+            if campData.returnToCamp then
+                if Math.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
+                    Comms.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
+                    return false,
+                        string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
+                            Math.GetDistance(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY), member.X(), member.Y(),
+                            campData.campSettings.AutoCampX, campData.campSettings.AutoCampY)
                 end
+            else
+                if (member.Distance() or 0) > math.max(Config:GetSetting('AutoCampRadius'), 200) then
+                    Comms.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
+                    return false,
+                        string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
+                            Math.GetDistance(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY), member.X(), member.Y(),
+                            mq.TLO.Me.X(),
+                            mq.TLO.Me.Y())
+                end
+            end
 
-                if campData.returnToCamp then
-                    if Math.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
-                        Comms.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
-                        return false,
-                            string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
-                                Math.GetDistance(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY), member.X(), member.Y(),
-                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampY)
+            if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
+                if member.ID() == Core.GetMainAssistId() then
+                    if campData.returnToCamp and Math.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
+                        Comms.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(),
+                            campData.campSettings.AutoCampY,
+                            campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, Config:GetSetting('AutoCampRadius'))
+                        return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                     end
                 else
-                    if (member.Distance() or 0) > math.max(Config:GetSetting('AutoCampRadius'), 200) then
-                        Comms.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
-                        return false,
-                            string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
-                                Math.GetDistance(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY), member.X(), member.Y(),
-                                mq.TLO.Me.X(),
-                                mq.TLO.Me.Y())
-                    end
-                end
-
-                if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
-                    if member.ID() == Core.GetMainAssistId() then
-                        if campData.returnToCamp and Math.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
-                            Comms.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(),
-                                campData.campSettings.AutoCampY,
-                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, Config:GetSetting('AutoCampRadius'))
-                            return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
-                        end
-                    else
-                        if Math.GetDistanceSquared(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > maxDist then
-                            Comms.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
-                                Config:GetSetting('AutoCampRadius'))
-                            return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
-                        end
+                    if Math.GetDistanceSquared(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > maxDist then
+                        Comms.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
+                            Config:GetSetting('AutoCampRadius'))
+                        return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                     end
                 end
             end
@@ -2238,24 +2306,10 @@ function Module:GiveTime(combat_state)
 
     self:SetLastPullOrCombatEndedTimer()
 
-    if self.settings.GroupWatch == 2 then
-        local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
-        if not groupReady then
-            Logger.log_verbose("PULL:GiveTime() - GroupWatch Failed")
-            self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
-            return
-        end
-    elseif self.settings.GroupWatch == 3 then
-        local groupReady, groupReason = self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
+    if self.settings.GroupWatch then
+        local groupReady, groupReason = self:CheckGroupForPull(self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
         if not groupReady then
             Logger.log_verbose("PULL:GiveTime() - GroupWatch2 Failed")
-            self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
-            return
-        end
-    elseif self.settings.GroupWatch == 4 then
-        local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
-        if not groupReady then
-            Logger.log_verbose("PULL:GiveTime() - GroupWatch Failed")
             self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
             return
         end
@@ -2445,6 +2499,7 @@ function Module:GiveTime(combat_state)
             Logger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
 
             local successFn = function() return Targeting.GetXTHaterCount() > 0 end
+            local maxMove = self.settings.MaxMoveTime * 1000
 
             if self:IsPullMode("Chain") then
                 successFn = function() return Targeting.GetXTHaterCount() >= self.settings.ChainCount end
@@ -2509,7 +2564,7 @@ function Module:GiveTime(combat_state)
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     Core.DoCmd("/ranged %d", self.TempSettings.PullID)
@@ -2537,7 +2592,7 @@ function Module:GiveTime(combat_state)
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     mq.doevents()
@@ -2565,7 +2620,7 @@ function Module:GiveTime(combat_state)
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay(500, function() return mq.TLO.Navigation.Active() end)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     if pullAbility.Type:lower() == "ability" then
